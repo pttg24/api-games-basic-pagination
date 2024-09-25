@@ -1,4 +1,4 @@
-name: .NET Core CI
+name: CI Build and Test
 
 on:
   pull_request:
@@ -13,25 +13,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0.x' # Use the version that matches your project
+          dotnet-version: '6.0.x'
 
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
+        run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage"
 
       - name: Upload test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path: test_results.trx
+          path: '**/TestResults/*'
+
+      - name: Upload code coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage
+          path: '**/coverage.cobertura.xml'
