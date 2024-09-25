@@ -1,0 +1,49 @@
+name: CI Build and Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/BasicGaming.Api/BasicGaming.Api.csproj
+
+      - name: Build
+        run: dotnet build src/BasicGaming.Api/BasicGaming.Api.csproj --configuration Release --no-restore
+
+      - name: Restore dependencies for the test project
+        run: dotnet restore tests/BasicGaming.Api.Tests/BasicGaming.Api.Tests.csproj
+
+      - name: Build the test project
+        run: dotnet build tests/BasicGaming.Api.Tests/BasicGaming.Api.Tests.csproj --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test tests/BasicGaming.Api.Tests/BasicGaming.Api.Tests.csproj --configuration Release --no-build --collect:"XPlat Code Coverage"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: '**/TestResults/*'
+
+      - name: Upload code coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage
+          path: '**/coverage.cobertura.xml'

@@ -11,6 +11,8 @@ public class GameDTO
     public DateTime ReleaseDate { get; set; }
     public int RequiredAge { get; set; }
 
+    public GameDTO() { }
+
     public GameDTO(Game game)
     {
         Id = game.appid;
